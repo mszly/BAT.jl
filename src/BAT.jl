@@ -6,59 +6,50 @@ module BAT
 
 using Base.Threads
 
-import Base.Math.JuliaLibm
+# import Base.Math.JuliaLibm
 
+using Distributed
+using LinearAlgebra
+using Markdown
+using Random
+using Statistics
 
+using ArgCheck
+using ArraysOfArrays
 using Clustering
 using Colors
 using Distributions
-using DoubleDouble
+using DoubleFloats
 using ElasticArrays
 using FunctionWrappers
 using IntervalSets
-using MultiThreadingTools
+using ParallelProcessingTools
 using Parameters
+using ValueShapes
 using PDMats
 using RecipesBase
+using StaticArrays
 using StatsBase
+using UnsafeArrays
 
 import DiffResults
 import ForwardDiff
 import RandomNumbers
+import TypedTables
 
 
-include("logging.jl")
+include("Logging/Logging.jl")
 using BAT.Logging
 
-include("shims.jl")
-include("rng.jl")
-include("distributions.jl")
-include("util.jl")
-include("execcontext.jl")
-include("onlineuvstats.jl")
-include("onlinemvstats.jl")
-include("spatialvolume.jl")
-include("parambounds.jl")
-include("proposaldist.jl")
-include("density.jl")
-include("const_density.jl")
-include("density_product.jl")
-include("product_density.jl")
-include("mvdist_density.jl")
-include("algorithms.jl")
-include("data_vector.jl")
-include("density_sample.jl")
-include("mcmc_algorithm.jl")
-include("mcmc_sampleid.jl")
-include("mcmc_stats.jl")
-include("mcmc_convergence.jl")
-include("mcmc_tuner.jl")
-include("mcmc_accrejstate.jl")
-include("mh_sampler.jl")
-include("mh_tuner.jl")
-include("direct_sampler.jl")
-include("mcmc_rand.jl")
-include("plots_recipes.jl")
+include("utils/utils.jl")
+include("rngs/rngs.jl")
+include("distributions/distributions.jl")
+include("scheduling/scheduling.jl")
+include("parameters/parameters.jl")
+include("statistics/statistics.jl")
+include("densities/densities.jl")
+include("samplers/samplers.jl")
+include("plotting/plotting.jl")
 
 Logging.@enable_logging
 

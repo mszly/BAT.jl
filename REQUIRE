@@ -1,15 +1,20 @@
-julia 0.6
+julia 1.0
+ArgCheck
+ArraysOfArrays
 Clustering
 Colors
-Compat 0.33
 Distributions
-DoubleDouble
+DoubleFloats 0.3.4
 ElasticArrays
 FunctionWrappers
 IntervalSets
-MultiThreadingTools
+ParallelProcessingTools
 Parameters
+ValueShapes
 PDMats
 RandomNumbers
 RecipesBase
+StaticArrays
 StatsBase
+TypedTables
+UnsafeArrays
