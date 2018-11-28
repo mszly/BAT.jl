@@ -25,12 +25,18 @@ using FunctionWrappers
 using IntervalSets
 using ParallelProcessingTools
 using Parameters
-using ValueShapes
 using PDMats
 using RecipesBase
+using ShapesOfVariables
 using StaticArrays
 using StatsBase
 using UnsafeArrays
+
+#for AHMI
+using ProgressMeter
+using DataStructures
+using LaTeXStrings
+using Cuba
 
 import RandomNumbers
 import TypedTables
@@ -38,6 +44,7 @@ import TypedTables
 
 include("Logging/Logging.jl")
 using BAT.Logging
+
 
 include("utils/utils.jl")
 include("rngs/rngs.jl")
@@ -47,6 +54,7 @@ include("parameters/parameters.jl")
 include("statistics/statistics.jl")
 include("densities/densities.jl")
 include("samplers/samplers.jl")
+include("integration_ahmi/AHMI.jl")
 include("plotting/plotting.jl")
 
 Logging.@enable_logging
