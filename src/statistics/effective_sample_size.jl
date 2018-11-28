@@ -9,8 +9,11 @@ autocorrelation := Σ Cov[x_i,x_(i+k)]/Var[x]
 Computes the autocorrelations at various leg k of the
 input vector (time series) xv.
 The vector kv is the collections of lags to take into account
+Optionally a masking vector of bool can be defined, so that the autocrl is only
+computed on a given subset of samples, while maintaining the correct distance in
+the series.
 """
-function autocrl(xv::AbstractVector{T}, kv::AbstractVector{Int} = Vector{Int}()) where T<:Real
+function autocrl(xv::AbstractVector{T}, kv::AbstractVector{Int} = Vector{Int}(); masking::AbstractVector{Bool} = Vector{Bool}()) where T<:Real
        N = size(xv)[1]
        if size(kv)[1] == 0
            kv = 1:(N-1)
@@ -21,6 +24,9 @@ function autocrl(xv::AbstractVector{T}, kv::AbstractVector{Int} = Vector{Int}())
            autocrl_num = 0.0
            autocrl_den = 0.0
            for i in 1:N-k
+               if length(masking) > 0 && (!masking[i] && !masking[i+k])
+                   continue
+               end
                autocrl_num += (xv[i+k] - x_avg)*(xv[i]-x_avg)
                autocrl_den += (xv[i]-x_avg)^2
            end
@@ -48,9 +54,23 @@ the Kish approximation is applied.
 
 By default computes the autocorrelation up to the square root of the number of entries
 in the vector, unless an explicit list of lags is provided (kv).
+
+Optionally accepts a vector of Int64 (masking_idxs) that are the indexes of xv on which
+to compute the effective sample size.
 """
-function effective_sample_size(xv::AbstractVector{T1}, w::AbstractVector{T2} = Vector{Float64}(zeros(0)), kv::AbstractVector{Int} = Vector{Int}(1:floor(Int,sqrt(length(xv))))) where T1<:Real where T2<:Number
-    atc = StatsBase.autocor(xv,kv)
+function effective_sample_size(xv::AbstractVector{T1}, w::AbstractVector{T2} = Vector{Float64}(zeros(0)), kv::AbstractVector{Int} = Vector{Int}(1:floor(Int,sqrt(length(xv)))); masking_idxs=idxs=Vector{Int64}()) where T1<:Real where T2<:Number
+    atc = []
+    # if we don't apply masking we can use a quick FFT autocorrelation
+    if length(idxs) == 0
+        atc = StatsBase.autocor(xv,kv)
+    else # otherwise we need to compute the masking vector and use a slower approach
+        msk = Vector{Bool}
+        msk = fill(false,length(xv))
+        for idx in pos
+            msk[idx] = true
+        end
+        atc = BAT.autocrl(xv,kv,masking=msk)
+    end
     # we need to break the sum when ρ_k + ρ_k+1 < 0
     # (see Thompson2010 - arXiv1011.0175 and Geyer2002)
     sumatc = 0
@@ -64,9 +84,17 @@ function effective_sample_size(xv::AbstractVector{T1}, w::AbstractVector{T2} = V
     result = size(xv)[1]/(1 + 2*sumatc)
     w_correction = 1.0
     if size(w) == size(xv)
-        w_correction = wgt_effective_sample_size(w)/size(w)[1]
+        if length(idxs) == 0
+            w_correction = wgt_effective_sample_size(w)/size(w)[1]
+        else # again we need to compute the Kish coeff only on the subsamples
+            w_correction = wgt_effective_sample_size(w[idxs])/size(w[idxs])[1]
+        end
     end
-    return min(length(xv),result*w_correction)
+    if length(idxs) == 0
+        return min(length(xv),result*w_correction)
+    else
+        return min(length(xv[idxs]),result*w_correction)
+    end
 end
 
 @doc """
